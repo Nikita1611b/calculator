@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import Header from "./Components/Header/Header";
+import History from "./Components/Header/History";
 import KeyPad from "./Components/KeyPad/KeyPad";
 
 import moonIcon from "./assets/moon.png";
@@ -15,7 +15,7 @@ const usedKeyCodes = [
 const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const operators = ["-", "+", "*", "/"];
 
-function App() {
+function App() {  
   const [isDarkMode, setIsDarkMode] = useState(
     JSON.parse(localStorage.getItem("calculator-app-mode")) || false
   );
@@ -24,10 +24,18 @@ function App() {
   const [history, setHistory] = useState(
     JSON.parse(localStorage.getItem("calculator-app-history")) || []
   );
-
+  const [afterResult, setAfterResult] = useState(false);
+  
+    
+ const setExressions = (value) => {
+   calculateResult(value);
+   setExression(value);
+ }
   const handleKeyPress = (keyCode, key) => {
     if (!keyCode) return;
     if (!usedKeyCodes.includes(keyCode)) return;
+    if (numbers.includes(key)  && afterResult) {setResult(key) ; setExression(key) ; setAfterResult(false); return};
+    if (afterResult && operators.includes(key)) {setAfterResult(false)};
 
     if (numbers.includes(key)) {
       if (key === "0") {
@@ -54,12 +62,15 @@ function App() {
       calculateResult(expression.slice(0, -1));
       setExression(expression.slice(0, -1));
     } else if (keyCode === 13) {
+      console.log("a")
+      if (afterResult.length < 0) return;
+      setAfterResult(true);
       if (!expression) return;
       calculateResult(expression);
 
       let tempHistory = [...history];
       if (tempHistory.length > 20) tempHistory = tempHistory.splice(0, 1);
-      tempHistory.push(expression);
+      tempHistory.push(expression + "=" + result);
       setHistory(tempHistory);
     }
   };
@@ -70,8 +81,9 @@ function App() {
       return;
     }
     const lastChar = exp.slice(-1);
+    console.log("a", )
     if (!numbers.includes(lastChar)) exp = exp.slice(0, -1);
-
+    
     const answer = eval(exp).toFixed(2) + "";
     setResult(answer);
   };
@@ -105,8 +117,9 @@ function App() {
           </div>
           <img src={isDarkMode ? moonIcon : sunIcon} alt="mode" />
         </div>
-
-        <Header expression={expression} result={result} history={history} />
+        <button></button>
+        <button></button>
+        <History expression={expression} result={result} history={history} setExressions={setExressions} />
         <KeyPad handleKeyPress={handleKeyPress} />
       </div>
     </div>
